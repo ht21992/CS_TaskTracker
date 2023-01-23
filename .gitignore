@@ -1,4 +1,5 @@
 __pycache__/
 /.vscode/
 jira.py
-
+sample.json
+second.json
