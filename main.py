@@ -55,21 +55,21 @@ with st.expander("Advanced Search"):
         requested_product = st.selectbox("Product Game: ", ('All', 'Games', 'Payments', 'Casino',
                                          'Other', 'Sportsbook', 'Wonder Wheel', 'Skill Games', 'Games', 'Promotion', 'Live Casino'))
     with c7:
-        # requested_status = st.selectbox("Status: ", ('All', 'Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
-        #                                 'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval'))
-        for index, cb in enumerate(('Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
-                                    'Rejected', 'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval')):
-            if index % 2 == 0:
-                with c9:
-                    if index == 0:
-                        st.markdown("Choose Status")
-                    check_box = st.checkbox(cb)
-            else:
-                with c10:
-                    if index == 1:
-                        st.markdown("<br>", unsafe_allow_html=True)
-                    check_box = st.checkbox(cb)
-            check_boxes[cb] = check_box
+        requested_status = st.selectbox("Status: ", ('All', 'Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
+                                        'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval'))
+        # for index, cb in enumerate(('Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
+        #                             'Rejected', 'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval')):
+        #     if index % 2 == 0:
+        #         with c9:
+        #             if index == 0:
+        #                 st.markdown("Choose Status")
+        #             check_box = st.checkbox(cb)
+        #     else:
+        #         with c10:
+        #             if index == 1:
+        #                 st.markdown("<br>", unsafe_allow_html=True)
+        #             check_box = st.checkbox(cb)
+        #     check_boxes[cb] = check_box
 
     index_column = st.selectbox(
         'Category By:',
@@ -113,19 +113,19 @@ def get_issues(email: str, jira_token: str, d: object, t: object, t2: object):
 def filter_by_timestamp(data: list, time):
     filtered_issues = []
     for issue in data:
-        try:
-            if not check_boxes['All']:
-                if not check_boxes[issue['fields']['status']['name']]:
-                    continue
-        except KeyError:
-            continue
-        # if requested_status != 'All':
-        #     if issue['fields']['status']['name'] != requested_status:
-        #         continue
-
-        if requested_product != 'All':
-            if issue['fields']['customfield_12513']['value'] != requested_product:
+        # try:
+        #     if not check_boxes['All']:
+        #         if not check_boxes[issue['fields']['status']['name']]:
+        #             continue
+        # except KeyError:
+        #     continue
+        if requested_status != 'All':
+            if issue['fields']['status']['name'] != requested_status:
                 continue
+
+        # if requested_product != 'All':
+        #     if issue['fields']['customfield_12513']['value'] != requested_product:
+        #         continue
         # a list of two strings -> example: ['2023-01-23', '10:56:50.910+0400']
         issue_date_and_time = issue['fields']['created'].split('T')
         # string format of the time - example -> 10:29:36
