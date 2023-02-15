@@ -1,5 +1,10 @@
 __pycache__/
 /.vscode/
+all_for_test/
+soduko/
 jira.py
 sample.json
 second.json
+useless.py
+fortest.py
+cacert.pem
