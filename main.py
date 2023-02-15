@@ -46,16 +46,30 @@ t = st.time_input('Start Time', datetime.time(8, 45))
 t2 = st.time_input('End Time', datetime.time(
     t.hour + 1 if t.hour < 23 else t.hour, 0))
 
+check_boxes = {}
 
 with st.expander("Advanced Search"):
     c7, c8 = st.columns([0.5, 0.5])
-    with c7:
-        requested_status = st.selectbox("Status: ", ('All', 'Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
-                                        'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval'))
-
+    c9, c10 = st.columns([0.5, 0.5])
     with c8:
         requested_product = st.selectbox("Product Game: ", ('All', 'Games', 'Payments', 'Casino',
                                          'Other', 'Sportsbook', 'Wonder Wheel', 'Skill Games', 'Games', 'Promotion', 'Live Casino'))
+    with c7:
+        # requested_status = st.selectbox("Status: ", ('All', 'Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
+        #                                 'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval'))
+        for index, cb in enumerate(('Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
+                                    'Rejected', 'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval')):
+            if index % 2 == 0:
+                with c9:
+                    if index == 0:
+                        st.markdown("Choose Status")
+                    check_box = st.checkbox(cb)
+            else:
+                with c10:
+                    if index == 1:
+                        st.markdown("<br>", unsafe_allow_html=True)
+                    check_box = st.checkbox(cb)
+            check_boxes[cb] = check_box
 
     index_column = st.selectbox(
         'Category By:',
@@ -64,12 +78,17 @@ st.write('Date:', d, 'Start Time', t)
 
 st.sidebar.title("HT Task Tracker")
 
+if all(not value for value in check_boxes.values()):
+    check_boxes['All'] = True
+else:
+    check_boxes['All'] = False
+
+
 EMAIL = st.sidebar.text_input("Enter Your Email Address")
 JIRA_TOKEN = st.sidebar.text_input("Enter Your Jira Token", type="password")
 
 
 def get_issues(email: str, jira_token: str, d: object, t: object, t2: object):
-
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json"
@@ -78,7 +97,7 @@ def get_issues(email: str, jira_token: str, d: object, t: object, t2: object):
     for startIndex in range(0, 500, 100):
         url = f"http://betconstruct.atlassian.net/rest/api/2/search?jql=project=VHD AND created%20%3E=%20%22{d.year}/{d.month}/{d.day} {t.hour}:{t.minute} %22%20and%20created%20%3C=%20%22{d.year}/{d.month}/{d.day + 1} %22&fields=key,parent,summary,assignee,status,timeestimate,created,updated,customfield_12513,customfield_12512,customfield_12511,reporter,priority,&maxResults=100&startAt={startIndex}"
         response = requests.get(url, headers=headers,
-                                auth=(email, jira_token))
+                                auth=(email.strip(), jira_token.strip()))
         try:
             resp = response.json()
             data.extend(resp['issues'])
@@ -94,9 +113,16 @@ def get_issues(email: str, jira_token: str, d: object, t: object, t2: object):
 def filter_by_timestamp(data: list, time):
     filtered_issues = []
     for issue in data:
-        if requested_status != 'All':
-            if issue['fields']['status']['name'] != requested_status:
-                continue
+        try:
+            if not check_boxes['All']:
+                if not check_boxes[issue['fields']['status']['name']]:
+                    continue
+        except KeyError:
+            continue
+        # if requested_status != 'All':
+        #     if issue['fields']['status']['name'] != requested_status:
+        #         continue
+
         if requested_product != 'All':
             if issue['fields']['customfield_12513']['value'] != requested_product:
                 continue
@@ -130,7 +156,7 @@ if not t >= t2:
 
         else:
             real_data = []
-            colors_dict = {'Ready for Development': '#FFFFF', 'Cancelled': '#F11212', 'Waiting for BetCo': '#FF00FF', 'Done': '#3DE785', 'Opened': '#3DE78D', 'Waiting for Reporter': '#FFFFFF', 'Prioritized': '#3D9CE7',
+            colors_dict = {'Ready for Development': '#FFFFF', 'Cancelled': '#F11212', 'Waiting for BetCo': '#072954', 'Done': '#3DE785', 'Opened': '#3DE78D', 'Waiting for Reporter': '#3182ed', 'Prioritized': '#3D9CE7',
                            'Closed': '#DFCFBE', 'In Progress': '#55B4B0', 'Backlog': '#5B5EA6', 'Waiting for Review': '#EFC050', 'To Do': '#DEE7EC', 'Review': '#B565A7', 'On hold': '#E15D44', 'Waiting for Approval': '#3DE7DE'}
 
             for issue in data:
@@ -162,8 +188,8 @@ if not t >= t2:
                 except TypeError:
                     skin = 'Unknown'
 
-                real_data.append(dict(Task=f"{issue['key']}", Start=f'{issue_date[0]} {issue_date[1][:8]}', Finish=f'{issue_update[0]} {issue_update[1][:8]}', Assignee=assignee, Reporter=reporter, Status=issue['fields']
-                                 ['status']['name'], Impact_Criticality=impact_criticality, Product_Game=product_game, Skin=skin, Color=colors_dict.get(issue['fields']['status']['name'], generate_random_hex_color())))
+                real_data.append(dict(Task=f"{issue['key']}", Start=f'{issue_date[0]} {issue_date[1][:8]}', Finish=f'{issue_update[0]} {issue_update[1][:8]}', Assignee=assignee, Reporter=reporter,
+                                      Status=issue['fields']['status']['name'], Impact_Criticality=impact_criticality, Product_Game=product_game, Skin=skin, Color=colors_dict.get(issue['fields']['status']['name'], generate_random_hex_color())))
 
             df = pd.DataFrame(real_data)
             table_df = df.drop(['Color'], axis=1)
