@@ -68,7 +68,7 @@ def get_issues(email: str, jira_token: str, d: object, t: object, t2: object):
     for startIndex in range(0, 500, 100):
         url = f"http://betconstruct.atlassian.net/rest/api/2/search?jql=project=VHD AND created%20%3E=%20%22{d.year}/{d.month}/{d.day} {t.hour}:{t.minute} %22%20and%20created%20%3C=%20%22{d.year}/{d.month}/{d.day + 1} %22&fields=key,parent,summary,assignee,status,timeestimate,created,updated,customfield_12513,customfield_12512,customfield_12511,reporter,priority,&maxResults=100&startAt={startIndex}"
         response = requests.get(url, headers=headers,
-                                auth=(email, jira_token), verify='./cacert.pem')
+                                auth=(email, jira_token))
         try:
             resp = response.json()
             data.extend(resp['issues'])
