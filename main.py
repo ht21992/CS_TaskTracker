@@ -46,10 +46,20 @@ t = st.time_input('Start Time', datetime.time(8, 45))
 t2 = st.time_input('End Time', datetime.time(
     t.hour + 1 if t.hour < 23 else t.hour, 0))
 
-index_column = st.selectbox(
-    'Category By:',
-    ('Status', 'Product Game', 'Skin', 'Impact Criticality'))
-print(index_column)
+
+with st.expander("Advanced Search"):
+    c7, c8 = st.columns([0.5, 0.5])
+    with c7:
+        requested_status = st.selectbox("Status: ", ('All', 'Closed', 'Ready for Development', 'Cancelled', 'Waiting for BetCo', 'Done', 'Opened', 'Waiting for Reporter', 'Prioritized',
+                                        'In Progress', 'Backlog', 'Waiting for Review', 'To Do', 'Review', 'On hold', 'Waiting for Approval'))
+
+    with c8:
+        requested_product = st.selectbox("Product Game: ", ('All', 'Games', 'Payments', 'Casino',
+                                         'Other', 'Sportsbook', 'Wonder Wheel', 'Skill Games', 'Games', 'Promotion', 'Live Casino'))
+
+    index_column = st.selectbox(
+        'Category By:',
+        ('Status', 'Product Game', 'Skin', 'Impact Criticality'))
 st.write('Date:', d, 'Start Time', t)
 
 st.sidebar.title("HT Task Tracker")
@@ -84,6 +94,12 @@ def get_issues(email: str, jira_token: str, d: object, t: object, t2: object):
 def filter_by_timestamp(data: list, time):
     filtered_issues = []
     for issue in data:
+        if requested_status != 'All':
+            if issue['fields']['status']['name'] != requested_status:
+                continue
+        if requested_product != 'All':
+            if issue['fields']['customfield_12513']['value'] != requested_product:
+                continue
         # a list of two strings -> example: ['2023-01-23', '10:56:50.910+0400']
         issue_date_and_time = issue['fields']['created'].split('T')
         # string format of the time - example -> 10:29:36
@@ -94,7 +110,6 @@ def filter_by_timestamp(data: list, time):
             pass
         else:
             filtered_issues.append(issue)
-
     return filtered_issues
 
 
@@ -152,8 +167,6 @@ if not t >= t2:
 
             df = pd.DataFrame(real_data)
             table_df = df.drop(['Color'], axis=1)
-
-            print('done')
 
             fig = ff.create_gantt(df, show_colorbar=True, index_col=index_column.replace(
                 ' ', '_'), colors=list(map(lambda x: x, df['Color'])))
