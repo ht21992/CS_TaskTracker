@@ -152,6 +152,10 @@ def generate_random_hex_color():
     return hex_number
 
 
+def make_clickable_both(name): 
+    # name, url = val.split('#')
+    return f'<a target="_blank" href="https://betconstruct.atlassian.net/browse/{name}">{name}</a>'
+
 if not t >= t2:
     if st.button('Get Issues'):
 
@@ -219,22 +223,23 @@ if not t >= t2:
 
             # Tables
             st.write("Tables")
-            st.table(table_df)
+            st.dataframe(table_df)
+
             # st.table(df)
             c1, c2, c3 = st.columns([0.5, 0.5, 0.5])
             with c1:
-                st.table(df['Status'].value_counts())
+                st.dataframe(df['Status'].value_counts())
             with c2:
-                st.table(df['Assignee'].value_counts())
+                st.dataframe(df['Assignee'].value_counts())
             with c3:
-                st.table(df['Product_Game'].value_counts())
-            c4, c5, c6 = st.columns([0.7, 0.5, 0.5])
+                st.dataframe(df['Product_Game'].value_counts())
+            c4, c5, c6 = st.columns([0.5, 0.5, 0.5])
             with c4:
-                st.table(df['Skin'].value_counts())
+                st.dataframe(df['Skin'].value_counts())
             with c5:
-                st.table(df['Reporter'].value_counts())
+                st.dataframe(df['Reporter'].value_counts())
             with c6:
-                st.table(df['Impact_Criticality'].value_counts())
+                st.dataframe(df['Impact_Criticality'].value_counts())
 
 else:
     st.markdown("End Time is more than Start Time")
