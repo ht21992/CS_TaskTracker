@@ -125,9 +125,12 @@ def filter_by_timestamp(data: list, time):
         #     if issue['fields']['status']['name'] != requested_status:
         #         continue
 
-        # if requested_product != 'All':
-        #     if issue['fields']['customfield_12513']['value'] != requested_product:
-        #         continue
+        if requested_product != 'All':
+            try :
+                if issue['fields']['customfield_12513']['value'] != requested_product:
+                    continue
+            except TypeError:
+                continue
 
         # a list of two strings -> example: ['2023-01-23', '10:56:50.910+0400']
         issue_date_and_time = issue['fields']['created'].split('T')
@@ -198,10 +201,10 @@ if not t >= t2:
                                       Status=issue['fields']['status']['name'], Impact_Criticality=impact_criticality, Product_Game=product_game, Skin=skin, Color=generate_random_hex_color()))
 
             df = pd.DataFrame(real_data)
-            # table_df = df.drop(['Color'], axis=1)
+            table_df = df.drop(['Color'], axis=1)
 
             if df.shape[0] > 36:
-                st.markdown('<b style="font-size:12px;color:#DD4124">Too many issues to show in the chart, we suggest to choose shorter time span or apply advanced filters</b>',unsafe_allow_html=True)
+                st.markdown('<b style="font-size:12px;color:#DD4124">Too many issues to show in the chart, we suggest to choose shorter time span or apply advanced filters</b>', unsafe_allow_html=True)
 
             fig = ff.create_gantt(df, show_colorbar=True, colors=df['Color'],
                                   index_col=index_column.replace(' ', '_'))
@@ -216,8 +219,8 @@ if not t >= t2:
 
             # Tables
             st.write("Tables")
-            # st.table(table_df)
-            st.table(df)
+            st.table(table_df)
+            # st.table(df)
             c1, c2, c3 = st.columns([0.5, 0.5, 0.5])
             with c1:
                 st.table(df['Status'].value_counts())
