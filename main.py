@@ -235,7 +235,7 @@ if not t >= t2:
                 st.dataframe(df['Product_Game'].value_counts())
             c4, c5, c6 = st.columns([0.5, 0.5, 0.5])
             with c4:
-                st.dataframe(df['Skin'].value_counts())
+                st.table(df['Skin'].value_counts())
             with c5:
                 st.dataframe(df['Reporter'].value_counts())
             with c6:
